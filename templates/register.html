@@ -13,28 +13,36 @@
         </div>
 
         <div class="auth-card">
-            {% if error %}
-            <div class="auth-error">{{ error }}</div>
-            {% endif %}
-
-            <form method="POST" action="/register">
+            <form method="POST" action="{{ url_for('register') }}">
                 <div class="form-group">
                     <label for="name">Full name</label>
-                    <input type="text" id="name" name="name"
-                           class="form-input" placeholder="Nitish Kumar"
+                    <input type="text" id="name" name="name" value="{{ name }}"
+                           class="form-input{% if errors.name %} is-invalid{% endif %}"
+                           placeholder="Nitish Kumar"
                            required autofocus>
+                    {% if errors.name %}
+                    <p class="field-error">{{ errors.name }}</p>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="email">Email address</label>
-                    <input type="email" id="email" name="email"
-                           class="form-input" placeholder="nitish@example.com"
+                    <input type="email" id="email" name="email" value="{{ email }}"
+                           class="form-input{% if errors.email %} is-invalid{% endif %}"
+                           placeholder="nitish@example.com"
                            required>
+                    {% if errors.email %}
+                    <p class="field-error"{% if duplicate_email %} data-auto-dismiss="true"{% endif %}>{{ errors.email }}</p>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password"
-                           class="form-input" placeholder="Min. 8 characters"
+                           class="form-input{% if errors.password %} is-invalid{% endif %}"
+                           placeholder="Min. 8 characters"
                            required>
+                    {% if errors.password %}
+                    <p class="field-error">{{ errors.password }}</p>
+                    {% endif %}
                 </div>
                 <button type="submit" class="btn-submit">Create account</button>
             </form>
