@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project overview
 
 Spendly is a lightweight personal expense tracker built with Flask and SQLite.
@@ -8,13 +10,16 @@ Spendly is a lightweight personal expense tracker built with Flask and SQLite.
 
 ## Architecture
 ```
-spendly/
+expense-tracker/
 ├── app.py              # All routes — single file, no blueprints
 ├── database/
+│   ├── __init__.py
 │   └── db.py           # SQLite helpers: get_db(), init_db(), seed_db()
 ├── templates/
 │   ├── base.html       # Shared layout — all templates must extend this
-│   └── *.html          # One template per page
+│   ├── landing.html    # Homepage
+│   ├── login.html      # Login page
+│   └── register.html   # Registration page
 ├── static/
 │   ├── css/
 │   │   ├── style.css       # Global styles
@@ -23,6 +28,24 @@ spendly/
 │       └── main.js         # Vanilla JS only
 └── requirements.txt
 ```
+
+### Database schema
+
+**users table**
+- `id` (INTEGER PRIMARY KEY) — auto-incrementing user ID
+- `name` (TEXT NOT NULL) — user's display name
+- `email` (TEXT UNIQUE NOT NULL) — user's email for login
+- `password_hash` (TEXT NOT NULL) — bcrypt-hashed password
+- `created_at` (TEXT DEFAULT now) — account creation timestamp
+
+**expenses table**
+- `id` (INTEGER PRIMARY KEY) — auto-incrementing expense ID
+- `user_id` (INTEGER NOT NULL, FK→users.id) — owner of the expense
+- `amount` (REAL NOT NULL) — expense amount
+- `category` (TEXT NOT NULL) — category (e.g., "Food", "Transport", "Bills")
+- `date` (TEXT NOT NULL) — expense date (YYYY-MM-DD format)
+- `description` (TEXT) — optional notes
+- `created_at` (TEXT DEFAULT now) — when the expense was recorded
 
 **Where things belong:**
 - New routes → `app.py` only, no blueprints
@@ -93,25 +116,26 @@ pytest -s
 | Route | Status |
 |---|---|
 | `GET /` | Implemented — renders `landing.html` |
-| `GET /register` | Implemented — renders `register.html` |
-| `GET /login` | Implemented — renders `login.html` |
-| `GET /logout` | Stub — Step 3 |
-| `GET /profile` | Stub — Step 4 |
-| `GET /expenses/add` | Stub — Step 7 |
-| `GET /expenses/<id>/edit` | Stub — Step 8 |
-| `GET /expenses/<id>/delete` | Stub — Step 9 |
+| `GET /register` | Implemented — renders `register.html`; handles POST for account creation |
+| `GET /login` | Implemented — renders `login.html`; handles POST for login |
+| `POST /logout` | Implemented — clears session and redirects to landing |
+| `GET /profile` | Placeholder — will display user profile (Step 4) |
+| `GET /expenses/add` | Placeholder — will add new expense form (Step 7) |
+| `GET /expenses/<id>/edit` | Placeholder — will edit expense form (Step 8) |
+| `GET /expenses/<id>/delete` | Placeholder — will delete expense (Step 9) |
 
-**Do not implement a stub route unless the active task explicitly targets that step.**
+**Do not implement a placeholder route unless the active task explicitly targets that step.**
 
 ---
 
 ## Warnings and things to avoid
 
-- **Never use raw string returns for stub routes** once a step is implemented — always render a template
+- **Never use raw string returns for placeholder routes** — always render a template with the feature implemented
 - **Never hardcode URLs** in templates — always use `url_for()`
 - **Never put DB logic in route functions** — it belongs in `database/db.py`
-- **Never install new packages** mid-feature without flagging it — keep `requirements.txt` in sync
+- **Never install new packages** mid-feature without explicit approval — keep `requirements.txt` in sync
 - **Never use JS frameworks** — the frontend is intentionally vanilla
-- **`database/db.py` is currently empty** — do not assume helpers exist until the step that implements them
-- **FK enforcement is manual** — SQLite foreign keys are off by default; `get_db()` must run `PRAGMA foreign_keys = ON` on every connection
+- **Always test with the seeded demo user** — email: `demo@spendly.com`, password: `demo123`
+- **FK enforcement is enabled** — `get_db()` runs `PRAGMA foreign_keys = ON` on every connection, so foreign key constraints are enforced
 - The app runs on **port 5001**, not the Flask default 5000 — don't change this
+- **Session-based auth** — `login_required` decorator protects routes; store `user_id` and `user_name` in Flask `session`
