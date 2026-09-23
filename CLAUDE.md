@@ -116,7 +116,7 @@ pytest -s
 | Route | Status |
 |---|---|
 | `GET /` | Implemented — renders `landing.html` |
-| `GET /register` | Implemented — renders `register.html`; handles POST for account creation |
+| `GET /register` | Implemented — renders `register.html` only (GET); no POST handling, validation, or account creation yet |
 | `GET /login` | Implemented — renders `login.html`; handles POST for login |
 | `POST /logout` | Implemented — clears session and redirects to landing |
 | `GET /profile` | Placeholder — will display user profile (Step 4) |

@@ -420,6 +420,16 @@ a { color: inherit; text-decoration: none; }
     margin-bottom: 1.25rem;
 }
 
+.field-error {
+    color: var(--danger);
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+}
+
+.form-input.is-invalid {
+    border-color: var(--danger);
+}
+
 .flash {
     border-radius: var(--radius-sm);
     padding: 0.75rem 1rem;
