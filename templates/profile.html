@@ -29,11 +29,11 @@
             <div class="profile-field">
                 <span class="profile-label">Member Since</span>
                 <span class="profile-value">
-                    {%- set dt = user.created_at.split(' ')[0] %}
-                    {%- set parts = dt.split('-') %}
-                    {%- set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+                    {%- set dt = user.created_at.split(' ')[0] -%}
+                    {%- set parts = dt.split('-') -%}
+                    {%- set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] -%}
                     {{ months[parts[1]|int - 1] }} {{ "%02d"|format(parts[2]|int) }}, {{ parts[0] }}
-                {%- endset %}
+                </span>
             </div>
         </div>
 
