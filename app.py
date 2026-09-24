@@ -58,31 +58,10 @@ def _resolve_date_range(range_key, start_param, end_param):
 
 @app.route("/")
 def landing():
-    if not session.get("user_id"):
-        return render_template("landing.html")
+    if session.get("user_id"):
+        return redirect(url_for("profile"))
 
-    range_key = request.args.get("range", "month")
-    if range_key not in DASHBOARD_RANGE_PRESETS:
-        range_key = "month"
-
-    start_param = request.args.get("start", "")
-    end_param = request.args.get("end", "")
-
-    start_date, end_date = _resolve_date_range(range_key, start_param, end_param)
-
-    user_id = session["user_id"]
-    expenses = get_expenses(user_id, start_date, end_date)
-    total, category_totals = get_expense_summary(user_id, start_date, end_date)
-
-    return render_template(
-        "landing.html",
-        expenses=expenses,
-        total=total,
-        category_totals=category_totals,
-        range_key=range_key,
-        start_date=start_date or "",
-        end_date=end_date or "",
-    )
+    return render_template("landing.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -202,7 +181,28 @@ def profile():
     if not user:
         abort(404)
 
-    return render_template("profile.html", user=user)
+    range_key = request.args.get("range", "month")
+    if range_key not in DASHBOARD_RANGE_PRESETS:
+        range_key = "month"
+
+    start_param = request.args.get("start", "")
+    end_param = request.args.get("end", "")
+
+    start_date, end_date = _resolve_date_range(range_key, start_param, end_param)
+
+    expenses = get_expenses(user_id, start_date, end_date)
+    total, category_totals = get_expense_summary(user_id, start_date, end_date)
+
+    return render_template(
+        "profile.html",
+        user=user,
+        expenses=expenses,
+        total=total,
+        category_totals=category_totals,
+        range_key=range_key,
+        start_date=start_date or "",
+        end_date=end_date or "",
+    )
 
 
 # ------------------------------------------------------------------ #
