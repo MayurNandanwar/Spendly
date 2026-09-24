@@ -29,7 +29,7 @@ expense-tracker/
 └── requirements.txt
 ```
 
-`landing.html` serves both the logged-out marketing page and the logged-in dashboard from one template (`{% if session.user_id %}` branches inside `templates/landing.html`) — there is no separate dashboard template.
+`landing.html` serves the logged-out marketing page only. Logged-in users are redirected to `/profile` which displays both the dashboard and account settings in a single view.
 
 ### Database schema
 
@@ -117,11 +117,11 @@ pytest -s
 
 | Route | Status |
 |---|---|
-| `GET /` | Implemented — renders `landing.html`; logged-out users see the marketing page, logged-in users see their expense dashboard with date-range filters (this month, 3 months, 6 months, custom start/end) |
+| `GET /` | Implemented — renders marketing page for logged-out users; logged-in users redirected to `/profile` |
 | `GET /register` | Implemented — renders `register.html`; handles POST with full validation and account creation |
 | `GET /login` | Implemented — renders `login.html`; handles POST for login |
 | `POST /logout` | Implemented — clears session and redirects to landing |
-| `GET /profile` | Implemented — displays user profile with name, email, account creation date; logout button; edit profile placeholder (Step 3) |
+| `GET /profile` | Implemented — consolidated dashboard + account settings; shows user header, expense dashboard with filters, and account info (Step 3) |
 | `GET /expenses/add` | Placeholder — will add new expense form (Step 7) |
 | `GET /expenses/<id>/edit` | Placeholder — will edit expense form (Step 8) |
 | `GET /expenses/<id>/delete` | Placeholder — will delete expense (Step 9) |
