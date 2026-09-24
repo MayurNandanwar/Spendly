@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from functools import wraps
+from datetime import date, timedelta
 import re
 import sqlite3
 
-from database.db import get_db, init_db, seed_db
+from database.db import get_db, init_db, seed_db, get_expenses, get_expense_summary
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -32,15 +33,62 @@ def login_required(f):
 # Routes                                                              #
 # ------------------------------------------------------------------ #
 
+DASHBOARD_RANGE_PRESETS = ("month", "3months", "6months", "custom")
+
+
+def _resolve_date_range(range_key, start_param, end_param):
+    """Turn a preset key (or custom start/end params) into concrete start/end dates."""
+    today = date.today()
+
+    if range_key == "custom":
+        start_date = start_param or None
+        end_date = end_param or None
+        return start_date, end_date
+
+    if range_key == "3months":
+        start_date = today - timedelta(days=90)
+    elif range_key == "6months":
+        start_date = today - timedelta(days=180)
+    else:
+        range_key = "month"
+        start_date = today.replace(day=1)
+
+    return start_date.isoformat(), today.isoformat()
+
+
 @app.route("/")
 def landing():
-    return render_template("landing.html")
+    if not session.get("user_id"):
+        return render_template("landing.html")
+
+    range_key = request.args.get("range", "month")
+    if range_key not in DASHBOARD_RANGE_PRESETS:
+        range_key = "month"
+
+    start_param = request.args.get("start", "")
+    end_param = request.args.get("end", "")
+
+    start_date, end_date = _resolve_date_range(range_key, start_param, end_param)
+
+    user_id = session["user_id"]
+    expenses = get_expenses(user_id, start_date, end_date)
+    total, category_totals = get_expense_summary(user_id, start_date, end_date)
+
+    return render_template(
+        "landing.html",
+        expenses=expenses,
+        total=total,
+        category_totals=category_totals,
+        range_key=range_key,
+        start_date=start_date or "",
+        end_date=end_date or "",
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if session.get('user_id'):
-        return redirect(url_for('profile'))
+        return redirect(url_for('landing'))
 
     errors = {}
     name = ""
@@ -106,7 +154,7 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get('user_id'):
-        return redirect(url_for('profile'))
+        return redirect(url_for('landing'))
 
     error = None
 
@@ -128,7 +176,7 @@ def login():
                 if user and check_password_hash(user["password_hash"], password):
                     session["user_id"] = user["id"]
                     session["user_name"] = user["name"]
-                    return redirect(url_for("profile"))
+                    return redirect(url_for("landing"))
                 else:
                     error = "Invalid email or password."
             finally:

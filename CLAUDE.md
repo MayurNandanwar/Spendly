@@ -22,12 +22,14 @@ expense-tracker/
 │   └── register.html   # Registration page
 ├── static/
 │   ├── css/
-│   │   ├── style.css       # Global styles
-│   │   └── landing.css     # Landing-page-only styles
+│   │   ├── style.css       # Global styles + design tokens (colors, fonts, radii in :root)
+│   │   └── dashboard.css   # Dashboard-page-only styles (filter bar, summary, expense list)
 │   └── js/
 │       └── main.js         # Vanilla JS only
 └── requirements.txt
 ```
+
+`landing.html` serves both the logged-out marketing page and the logged-in dashboard from one template (`{% if session.user_id %}` branches inside `templates/landing.html`) — there is no separate dashboard template.
 
 ### Database schema
 
@@ -115,7 +117,7 @@ pytest -s
 
 | Route | Status |
 |---|---|
-| `GET /` | Implemented — renders `landing.html` |
+| `GET /` | Implemented — renders `landing.html`; logged-out users see the marketing page, logged-in users see their expense dashboard with date-range filters (this month, 3 months, 6 months, custom start/end) |
 | `GET /register` | Implemented — renders `register.html` only (GET); no POST handling, validation, or account creation yet |
 | `GET /login` | Implemented — renders `login.html`; handles POST for login |
 | `POST /logout` | Implemented — clears session and redirects to landing |

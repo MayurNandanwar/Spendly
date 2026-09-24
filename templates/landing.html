@@ -1,9 +1,91 @@
 {% extends "base.html" %}
 
-{% block title %}Spendly — Track Every Rupee{% endblock %}
+{% block title %}
+{%- if session.user_id -%}Your Dashboard — Spendly{%- else -%}Spendly — Track Every Rupee{%- endif -%}
+{% endblock %}
+
+{% block head %}
+{% if session.user_id %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endif %}
+{% endblock %}
 
 {% block content %}
 
+{% if session.user_id %}
+<section class="dashboard-section">
+    <div class="dashboard-inner">
+
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Hi, {{ session.user_name }}</h1>
+            <p class="dashboard-subtitle">Here's a look at your spending.</p>
+        </div>
+
+        <form method="GET" action="{{ url_for('landing') }}" class="filter-bar" id="filter-form">
+            <div class="filter-presets">
+                <button type="submit" name="range" value="month"
+                        class="filter-chip {{ 'is-active' if range_key == 'month' else '' }}">This month</button>
+                <button type="submit" name="range" value="3months"
+                        class="filter-chip {{ 'is-active' if range_key == '3months' else '' }}">Last 3 months</button>
+                <button type="submit" name="range" value="6months"
+                        class="filter-chip {{ 'is-active' if range_key == '6months' else '' }}">Last 6 months</button>
+            </div>
+
+            <div class="filter-custom">
+                <div class="filter-field">
+                    <label for="start">From</label>
+                    <input type="date" id="start" name="start" class="form-input" value="{{ start_date }}">
+                </div>
+                <div class="filter-field">
+                    <label for="end">To</label>
+                    <input type="date" id="end" name="end" class="form-input" value="{{ end_date }}">
+                </div>
+                <button type="submit" name="range" value="custom" class="btn-primary filter-apply">Apply</button>
+            </div>
+        </form>
+
+        <div class="summary-card">
+            <span class="summary-label">Total spent</span>
+            <span class="summary-total">₹{{ "%.2f"|format(total) }}</span>
+        </div>
+
+        {% if category_totals %}
+        <div class="category-breakdown">
+            {% for row in category_totals %}
+            <div class="category-pill">
+                <span class="category-name">{{ row.category }}</span>
+                <span class="category-amt">₹{{ "%.2f"|format(row.total) }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="expense-list">
+            {% if expenses %}
+                {% for expense in expenses %}
+                <div class="expense-row">
+                    <div class="expense-main">
+                        <span class="expense-category">{{ expense.category }}</span>
+                        <span class="expense-desc">{{ expense.description or "" }}</span>
+                    </div>
+                    <div class="expense-meta">
+                        <span class="expense-date">{{ expense.date }}</span>
+                        <span class="expense-amount">₹{{ "%.2f"|format(expense.amount) }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No expenses found for this period.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+{% endif %}
+
+{% if not session.user_id %}
 <section class="hero">
     <div class="hero-inner">
         <div class="hero-badge">Personal Finance Tracker</div>
@@ -80,7 +162,9 @@
         </div>
     </div>
 </section>
+{% endif %}
 
+{% if not session.user_id %}
 <section class="cta-section">
     <div class="cta-inner">
         <h2 class="cta-title">Ready to take control?</h2>
@@ -88,5 +172,6 @@
         <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
     </div>
 </section>
+{% endif %}
 
 {% endblock %}

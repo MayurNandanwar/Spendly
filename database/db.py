@@ -44,6 +44,48 @@ def init_db():
         conn.close()
 
 
+def get_expenses(user_id, start_date=None, end_date=None):
+    """Return a user's expenses, optionally filtered to a date range (inclusive)."""
+    conn = get_db()
+    try:
+        query = "SELECT id, amount, category, date, description FROM expenses WHERE user_id = ?"
+        params = [user_id]
+
+        if start_date:
+            query += " AND date >= ?"
+            params.append(start_date)
+        if end_date:
+            query += " AND date <= ?"
+            params.append(end_date)
+
+        query += " ORDER BY date DESC, id DESC"
+        return conn.execute(query, params).fetchall()
+    finally:
+        conn.close()
+
+
+def get_expense_summary(user_id, start_date=None, end_date=None):
+    """Return total amount and category breakdown for a user's expenses in a date range."""
+    conn = get_db()
+    try:
+        query = "SELECT category, SUM(amount) AS total FROM expenses WHERE user_id = ?"
+        params = [user_id]
+
+        if start_date:
+            query += " AND date >= ?"
+            params.append(start_date)
+        if end_date:
+            query += " AND date <= ?"
+            params.append(end_date)
+
+        query += " GROUP BY category ORDER BY total DESC"
+        rows = conn.execute(query, params).fetchall()
+        grand_total = sum(row["total"] for row in rows)
+        return grand_total, rows
+    finally:
+        conn.close()
+
+
 def seed_db():
     conn = get_db()
     try:
