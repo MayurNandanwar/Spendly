@@ -86,6 +86,16 @@ def get_expense_summary(user_id, start_date=None, end_date=None):
         conn.close()
 
 
+def get_user_by_id(user_id):
+    """Return a user record by ID, or None if not found."""
+    conn = get_db()
+    try:
+        cursor = conn.execute("SELECT id, name, email, created_at FROM users WHERE id = ?", (user_id,))
+        return cursor.fetchone()
+    finally:
+        conn.close()
+
+
 def seed_db():
     conn = get_db()
     try:

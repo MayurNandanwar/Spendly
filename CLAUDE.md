@@ -118,10 +118,10 @@ pytest -s
 | Route | Status |
 |---|---|
 | `GET /` | Implemented — renders `landing.html`; logged-out users see the marketing page, logged-in users see their expense dashboard with date-range filters (this month, 3 months, 6 months, custom start/end) |
-| `GET /register` | Implemented — renders `register.html` only (GET); no POST handling, validation, or account creation yet |
+| `GET /register` | Implemented — renders `register.html`; handles POST with full validation and account creation |
 | `GET /login` | Implemented — renders `login.html`; handles POST for login |
 | `POST /logout` | Implemented — clears session and redirects to landing |
-| `GET /profile` | Placeholder — will display user profile (Step 4) |
+| `GET /profile` | Implemented — displays user profile with name, email, account creation date; logout button; edit profile placeholder (Step 3) |
 | `GET /expenses/add` | Placeholder — will add new expense form (Step 7) |
 | `GET /expenses/<id>/edit` | Placeholder — will edit expense form (Step 8) |
 | `GET /expenses/<id>/delete` | Placeholder — will delete expense (Step 9) |

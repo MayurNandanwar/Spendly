@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-section">
+    <div class="profile-inner">
+        <div class="profile-header">
+            <h1 class="profile-title">Account Settings</h1>
+            <p class="profile-subtitle">Manage your account information</p>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-field">
+                <span class="profile-label">Full Name</span>
+                <span class="profile-value">{{ user.name }}</span>
+            </div>
+
+            <div class="profile-field">
+                <span class="profile-label">Email Address</span>
+                <span class="profile-value">{{ user.email }}</span>
+            </div>
+
+            <div class="profile-field">
+                <span class="profile-label">Member Since</span>
+                <span class="profile-value">
+                    {%- set dt = user.created_at.split(' ')[0] %}
+                    {%- set parts = dt.split('-') %}
+                    {%- set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+                    {{ months[parts[1]|int - 1] }} {{ "%02d"|format(parts[2]|int) }}, {{ parts[0] }}
+                {%- endset %}
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{{ url_for('profile') }}" class="btn-secondary">Edit Profile</a>
+
+            <form method="POST" action="{{ url_for('logout') }}" class="logout-form">
+                <button type="submit" class="btn-danger">Sign Out</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

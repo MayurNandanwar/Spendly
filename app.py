@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from functools import wraps
 from datetime import date, timedelta
 import re
 import sqlite3
 
-from database.db import get_db, init_db, seed_db, get_expenses, get_expense_summary
+from database.db import get_db, init_db, seed_db, get_expenses, get_expense_summary, get_user_by_id
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -196,7 +196,13 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
-    return "Profile page — coming in Step 4"
+    user_id = session.get("user_id")
+    user = get_user_by_id(user_id)
+
+    if not user:
+        abort(404)
+
+    return render_template("profile.html", user=user)
 
 
 # ------------------------------------------------------------------ #
