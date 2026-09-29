@@ -24,7 +24,9 @@ def init_db():
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
-                created_at TEXT DEFAULT (datetime('now'))
+                created_at TEXT DEFAULT (datetime('now')),
+                refresh_token_hash TEXT,
+                refresh_token_expires_at TEXT
             )
         """)
         conn.execute("""
@@ -39,6 +41,16 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
+
+        # Migration guard: CREATE TABLE IF NOT EXISTS is a no-op on a users
+        # table that already existed before the refresh-token columns were
+        # added, so add them here if missing.
+        existing_columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)")}
+        if "refresh_token_hash" not in existing_columns:
+            conn.execute("ALTER TABLE users ADD COLUMN refresh_token_hash TEXT")
+        if "refresh_token_expires_at" not in existing_columns:
+            conn.execute("ALTER TABLE users ADD COLUMN refresh_token_expires_at TEXT")
+
         conn.commit()
     finally:
         conn.close()
@@ -86,12 +98,68 @@ def get_expense_summary(user_id, start_date=None, end_date=None):
         conn.close()
 
 
+def add_expense(user_id, amount, category, date, description):
+    """Insert a new expense for a user and return its new row id."""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            """
+            INSERT INTO expenses (user_id, amount, category, date, description)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (user_id, amount, category, date, description or None),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+
 def get_user_by_id(user_id):
     """Return a user record by ID, or None if not found."""
     conn = get_db()
     try:
         cursor = conn.execute("SELECT id, name, email, created_at FROM users WHERE id = ?", (user_id,))
         return cursor.fetchone()
+    finally:
+        conn.close()
+
+
+def store_refresh_token(user_id, token_hash, expires_at):
+    """Persist the hash and expiry of a user's active refresh token, replacing any previous one."""
+    conn = get_db()
+    try:
+        conn.execute(
+            "UPDATE users SET refresh_token_hash = ?, refresh_token_expires_at = ? WHERE id = ?",
+            (token_hash, expires_at, user_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_user_by_refresh_token_hash(token_hash):
+    """Return the user owning this refresh token hash, or None if no match."""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "SELECT id, name, email, refresh_token_expires_at FROM users WHERE refresh_token_hash = ?",
+            (token_hash,),
+        )
+        return cursor.fetchone()
+    finally:
+        conn.close()
+
+
+def clear_refresh_token(user_id):
+    """Invalidate a user's stored refresh token (e.g. on logout)."""
+    conn = get_db()
+    try:
+        conn.execute(
+            "UPDATE users SET refresh_token_hash = NULL, refresh_token_expires_at = NULL WHERE id = ?",
+            (user_id,),
+        )
+        conn.commit()
     finally:
         conn.close()
 

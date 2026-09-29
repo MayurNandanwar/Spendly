@@ -335,3 +335,6 @@
         justify-content: space-between;
     }
 }
+
+.form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+.optional-label { color: var(--ink-faint); font-weight: 400; }

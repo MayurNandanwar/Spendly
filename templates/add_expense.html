@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expense — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="dashboard-inner">
+
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">Add Expense</h2>
+            <p class="dashboard-subtitle">Record a new expense to track your spending.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('add_expense_route') }}">
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" name="amount" value="{{ amount }}"
+                       class="form-input{% if errors.amount %} is-invalid{% endif %}"
+                       placeholder="0.00" min="0.01" step="0.01"
+                       required autofocus>
+                {% if errors.amount %}
+                <p class="field-error">{{ errors.amount }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category"
+                        class="form-input{% if errors.category %} is-invalid{% endif %}"
+                        required>
+                    <option value="" disabled {% if not category %}selected{% endif %}>Select a category</option>
+                    {% for c in categories %}
+                    <option value="{{ c }}" {% if category == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+                {% if errors.category %}
+                <p class="field-error">{{ errors.category }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" value="{{ date }}"
+                       class="form-input{% if errors.date %} is-invalid{% endif %}"
+                       max="{{ today }}"
+                       required>
+                {% if errors.date %}
+                <p class="field-error">{{ errors.date }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description <span class="optional-label">(optional)</span></label>
+                <input type="text" id="description" name="description" value="{{ description }}"
+                       class="form-input{% if errors.description %} is-invalid{% endif %}"
+                       maxlength="500" placeholder="Groceries, dinner, taxi...">
+                {% if errors.description %}
+                <p class="field-error">{{ errors.description }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Add Expense</button>
+                <a href="{{ url_for('profile') }}" class="btn-ghost">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</section>
+
+{% endblock %}
