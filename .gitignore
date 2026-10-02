@@ -1,8 +1,10 @@
 venv/
-expense_tracker.db
 __pycache__/
 *.pyc
 *.pyo
 .env
 .DS_Store
 .claude/plans/
+
+# Local SQLite database (holds password and token hashes)
+*.db

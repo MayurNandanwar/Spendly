@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — Spendly{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set img = 'img/analytics/' %}
+<div class="an-page">
+
+    {# ---------------- Hero ---------------- #}
+    <section class="an-hero">
+        <img class="an-atmosphere an-atmosphere-lilac" src="{{ url_for('static', filename=img ~ 'lilac-atmosphere.svg') }}" alt="">
+        <img class="an-atmosphere an-atmosphere-peach" src="{{ url_for('static', filename=img ~ 'peach-atmosphere.svg') }}" alt="">
+        <img class="an-atmosphere an-atmosphere-blue" src="{{ url_for('static', filename=img ~ 'blue-atmosphere.svg') }}" alt="">
+
+        <div class="an-hero-content">
+            <div class="an-status">
+                <img src="{{ url_for('static', filename=img ~ 'status-dot.svg') }}" alt="" width="7" height="7">
+                <span>Private beta opens winter 2026</span>
+            </div>
+            <h1 class="an-hero-title">Make space for your best work.</h1>
+            <p class="an-hero-copy">Aster is a calm, intelligent workspace that turns scattered ideas into clear plans—without adding more noise to your day.</p>
+
+            <div class="an-signup">
+                <div class="an-signup-field">
+                    <div class="an-email">
+                        <img src="{{ url_for('static', filename=img ~ 'mail.svg') }}" alt="" width="18" height="18">
+                        <span>you@company.com</span>
+                    </div>
+                    <span class="an-join">
+                        <span>Join the waitlist</span>
+                        <img src="{{ url_for('static', filename=img ~ 'arrow-right.svg') }}" alt="" width="16" height="16">
+                    </span>
+                </div>
+                <div class="an-note">
+                    <img src="{{ url_for('static', filename=img ~ 'lock-keyhole.svg') }}" alt="" width="13" height="13">
+                    <span>Early access, occasional product notes, no clutter.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="an-edition">
+            <span>Founding edition</span>
+            <img src="{{ url_for('static', filename=img ~ 'sparkles.svg') }}" alt="" width="15" height="15">
+        </div>
+    </section>
+
+    {# ---------------- Product preview ---------------- #}
+    <section class="an-preview">
+        <div class="an-preview-label">
+            <div class="an-section-label">
+                <b>01</b><span>A glimpse inside</span>
+            </div>
+            <p>Early interface preview · subject to thoughtful change</p>
+        </div>
+
+        <div class="an-window">
+            <div class="an-window-bar">
+                <img src="{{ url_for('static', filename=img ~ 'window-controls.svg') }}" alt="" width="41" height="9">
+                <div class="an-workspace-id">
+                    <img src="{{ url_for('static', filename=img ~ 'workspace-mark.svg') }}" alt="" width="20" height="20">
+                    <span>Aster / Northstar Studio</span>
+                </div>
+                <img src="{{ url_for('static', filename=img ~ 'profile.svg') }}" alt="" width="53" height="27">
+            </div>
+
+            <div class="an-workspace">
+                <aside class="an-sidebar">
+                    <p class="an-sidebar-heading">Workspace</p>
+                    <div class="an-sidebar-item an-sidebar-item-active">
+                        <img src="{{ url_for('static', filename=img ~ 'sun.svg') }}" alt="" width="16" height="16">
+                        <span>Today</span>
+                    </div>
+                    <div class="an-sidebar-item">
+                        <img src="{{ url_for('static', filename=img ~ 'inbox.svg') }}" alt="" width="16" height="16">
+                        <span>Inbox</span>
+                    </div>
+                    <div class="an-sidebar-item">
+                        <img src="{{ url_for('static', filename=img ~ 'layout-dashboard.svg') }}" alt="" width="16" height="16">
+                        <span>Projects</span>
+                    </div>
+                    <div class="an-sidebar-item">
+                        <img src="{{ url_for('static', filename=img ~ 'book-open.svg') }}" alt="" width="16" height="16">
+                        <span>Notes</span>
+                    </div>
+
+                    <div class="an-project-group">
+                        <p class="an-sidebar-heading">Focus</p>
+                        <div class="an-project">
+                            <img src="{{ url_for('static', filename=img ~ 'project-color.svg') }}" alt="" width="8" height="8">
+                            <span>Launch story</span>
+                        </div>
+                        <div class="an-project">
+                            <img src="{{ url_for('static', filename=img ~ 'project-color-2.svg') }}" alt="" width="8" height="8">
+                            <span>Brand refresh</span>
+                        </div>
+                    </div>
+
+                    <div class="an-sidebar-spacer"></div>
+                    <div class="an-invite">
+                        <img src="{{ url_for('static', filename=img ~ 'user-plus.svg') }}" alt="" width="15" height="15">
+                        <span>Invite people</span>
+                    </div>
+                </aside>
+
+                <div class="an-today">
+                    <div class="an-view-header">
+                        <div class="an-view-title">
+                            <p class="an-view-date">Tuesday · 6 October</p>
+                            <p class="an-view-greeting">Good morning, Maya.</p>
+                        </div>
+                        <span class="an-add-task">
+                            <img src="{{ url_for('static', filename=img ~ 'plus.svg') }}" alt="" width="14" height="14">
+                            <span>New task</span>
+                        </span>
+                    </div>
+
+                    <div class="an-summary">
+                        <div class="an-plan">
+                            <div class="an-plan-header">
+                                <div class="an-plan-title">
+                                    <img src="{{ url_for('static', filename=img ~ 'target.svg') }}" alt="" width="16" height="16">
+                                    <span>Today’s focus</span>
+                                </div>
+                                <span class="an-plan-count">2 of 5 complete</span>
+                            </div>
+
+                            <div class="an-plan-item">
+                                <img src="{{ url_for('static', filename=img ~ 'completion.svg') }}" alt="" width="18" height="18">
+                                <div class="an-item-copy an-item-done">
+                                    <p class="an-item-title">Shape launch narrative</p>
+                                    <p class="an-item-meta">Launch story · 45 min</p>
+                                </div>
+                                <img src="{{ url_for('static', filename=img ~ 'project-color.svg') }}" alt="" width="8" height="8">
+                            </div>
+                            <div class="an-plan-item">
+                                <img src="{{ url_for('static', filename=img ~ 'completion-open.svg') }}" alt="" width="18" height="18">
+                                <div class="an-item-copy">
+                                    <p class="an-item-title">Review onboarding flow</p>
+                                    <p class="an-item-meta">Product · 30 min</p>
+                                </div>
+                                <img src="{{ url_for('static', filename=img ~ 'category.svg') }}" alt="" width="8" height="8">
+                            </div>
+                            <div class="an-plan-item">
+                                <img src="{{ url_for('static', filename=img ~ 'completion-open.svg') }}" alt="" width="18" height="18">
+                                <div class="an-item-copy">
+                                    <p class="an-item-title">Write beta welcome note</p>
+                                    <p class="an-item-meta">Launch story · 25 min</p>
+                                </div>
+                                <img src="{{ url_for('static', filename=img ~ 'project-color.svg') }}" alt="" width="8" height="8">
+                            </div>
+                            <div class="an-plan-item">
+                                <img src="{{ url_for('static', filename=img ~ 'completion-open.svg') }}" alt="" width="18" height="18">
+                                <div class="an-item-copy">
+                                    <p class="an-item-title">Sync with design partners</p>
+                                    <p class="an-item-meta">People · 2:30 PM</p>
+                                </div>
+                                <img src="{{ url_for('static', filename=img ~ 'project-color-2.svg') }}" alt="" width="8" height="8">
+                            </div>
+                        </div>
+
+                        <div class="an-rail">
+                            <div class="an-momentum">
+                                <div class="an-momentum-header">
+                                    <span>Momentum</span>
+                                    <span class="an-momentum-delta">+18%</span>
+                                </div>
+                                <p class="an-momentum-copy">Your clearest working rhythm this month.</p>
+                                <div class="an-chart">
+                                    {% for label in ['M', 'T', 'W', 'T', 'F', 'S', 'S'] %}
+                                    <div class="an-day">
+                                        <div class="an-bar"></div>
+                                        <span>{{ label }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="an-nudge">
+                                <div class="an-nudge-label">
+                                    <img src="{{ url_for('static', filename=img ~ 'sparkles-nudge.svg') }}" alt="" width="14" height="14">
+                                    <span>Gentle nudge</span>
+                                </div>
+                                <p>Protect 45 minutes for the launch story before your afternoon fills up.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ---------------- Product promise ---------------- #}
+    <section class="an-promise">
+        <div class="an-promise-content">
+            <div class="an-statement">
+                <div class="an-section-label">
+                    <b>02</b><span>Designed for clarity</span>
+                </div>
+                <h2>Less managing work. More meaningful momentum.</h2>
+                <p>Aster keeps priorities, notes, and decisions in one gentle rhythm—so your attention stays on the work that matters.</p>
+            </div>
+
+            <div class="an-values">
+                <div class="an-value">
+                    <div class="an-icon-tile"><img src="{{ url_for('static', filename=img ~ 'route.svg') }}" alt="" width="18" height="18"></div>
+                    <div class="an-value-copy">
+                        <p class="an-value-title">A plan that adapts with you</p>
+                        <p class="an-value-text">Turn open loops into a realistic daily plan, then reshape it without losing the thread.</p>
+                    </div>
+                </div>
+                <div class="an-value">
+                    <div class="an-icon-tile"><img src="{{ url_for('static', filename=img ~ 'layers.svg') }}" alt="" width="18" height="18"></div>
+                    <div class="an-value-copy">
+                        <p class="an-value-title">Context that stays connected</p>
+                        <p class="an-value-text">Link the note, decision, and next step—without rebuilding your system every week.</p>
+                    </div>
+                </div>
+                <div class="an-value">
+                    <div class="an-icon-tile"><img src="{{ url_for('static', filename=img ~ 'sparkles-ai.svg') }}" alt="" width="18" height="18"></div>
+                    <div class="an-value-copy">
+                        <p class="an-value-title">Intelligence, kept in its place</p>
+                        <p class="an-value-text">Useful prompts arrive when they help and disappear when it is time to focus.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="an-roadmap">
+            <div class="an-roadmap-intro">
+                <img src="{{ url_for('static', filename=img ~ 'radio.svg') }}" alt="" width="16" height="16">
+                <span>Building in public</span>
+            </div>
+            <div class="an-roadmap-steps">
+                <div class="an-milestone an-milestone-now">
+                    <img src="{{ url_for('static', filename=img ~ 'marker.svg') }}" alt="" width="9" height="9">
+                    <div><p>Product studio</p><p>Now</p></div>
+                </div>
+                <div class="an-milestone">
+                    <img src="{{ url_for('static', filename=img ~ 'marker-future.svg') }}" alt="" width="9" height="9">
+                    <div><p>Private beta</p><p>Winter 2026</p></div>
+                </div>
+                <div class="an-milestone">
+                    <img src="{{ url_for('static', filename=img ~ 'marker-future.svg') }}" alt="" width="9" height="9">
+                    <div><p>Public launch</p><p>Spring 2027</p></div>
+                </div>
+            </div>
+            <p class="an-roadmap-note">Shaped with 42 founding teams</p>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

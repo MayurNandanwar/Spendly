@@ -2,6 +2,7 @@
 from functools import wraps
 from datetime import date, datetime, timedelta, timezone
 import hashlib
+import os
 import re
 import secrets
 import sqlite3
@@ -9,25 +10,37 @@ import sqlite3
 import jwt
 
 from database.db import (
-    get_db, init_db, seed_db, get_expenses, get_expense_summary, get_user_by_id,
+    CATEGORIES, get_db, init_db, seed_db, get_expenses, get_expense_summary, get_user_by_id,
     store_refresh_token, get_user_by_refresh_token_hash, clear_refresh_token,
     add_expense, get_expense_by_id, update_expense, delete_expense,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-app.secret_key = "dev-secret-key-change-in-production"
 
-JWT_SECRET_KEY = "dev-jwt-secret-change-in-production"
+# Secrets come from the environment. If unset, a random per-process value is
+# used so nothing forgeable is ever committed; sessions/tokens then reset on
+# every restart. Set SPENDLY_SECRET_KEY / SPENDLY_JWT_SECRET for stable values.
+app.secret_key = os.environ.get("SPENDLY_SECRET_KEY") or secrets.token_hex(32)
+
+JWT_SECRET_KEY = os.environ.get("SPENDLY_JWT_SECRET") or secrets.token_hex(32)
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_TTL = timedelta(minutes=15)
 REFRESH_TOKEN_TTL = timedelta(days=7)
 ACCESS_COOKIE_NAME = "access_token"
 REFRESH_COOKIE_NAME = "refresh_token"
 
+# The demo account (demo@spendly.com / demo123) has a public password, so it is
+# only seeded for development: set SPENDLY_SEED_DEMO=1 or run with FLASK_DEBUG=1.
+SEED_DEMO = (
+    os.environ.get("SPENDLY_SEED_DEMO") == "1"
+    or os.environ.get("FLASK_DEBUG") == "1"
+)
+
 with app.app_context():
     init_db()
-    seed_db()
+    if SEED_DEMO:
+        seed_db()
 
 
 # ------------------------------------------------------------------ #
@@ -76,15 +89,18 @@ def issue_auth_cookies(response, user_id, name):
     raw_refresh_token, refresh_hash, refresh_expires_at = create_refresh_token()
     store_refresh_token(user_id, refresh_hash, refresh_expires_at)
 
+    # Secure cookies by default; relaxed only in debug so plain-HTTP dev works.
+    secure_cookie = not app.debug
+
     response.set_cookie(
         ACCESS_COOKIE_NAME, access_token,
         max_age=int(ACCESS_TOKEN_TTL.total_seconds()),
-        httponly=True, secure=True, samesite="Lax", path="/",
+        httponly=True, secure=secure_cookie, samesite="Lax", path="/",
     )
     response.set_cookie(
         REFRESH_COOKIE_NAME, raw_refresh_token,
         max_age=int(REFRESH_TOKEN_TTL.total_seconds()),
-        httponly=True, secure=True, samesite="Lax", path="/",
+        httponly=True, secure=secure_cookie, samesite="Lax", path="/",
     )
     return response
 
@@ -102,10 +118,12 @@ def clear_auth_cookies(response):
 @app.before_request
 def load_current_user():
     payload = decode_access_token(request.cookies.get(ACCESS_COOKIE_NAME))
+    g.current_user = None
     if payload:
-        g.current_user = {"id": int(payload["sub"]), "name": payload["name"]}
-    else:
-        g.current_user = None
+        try:
+            g.current_user = {"id": int(payload["sub"]), "name": payload["name"]}
+        except (KeyError, TypeError, ValueError):
+            g.current_user = None
 
 
 @app.context_processor
@@ -134,14 +152,21 @@ def login_required(f):
 DASHBOARD_RANGE_PRESETS = ("month", "3months", "6months", "custom")
 
 
+def _valid_iso_date(value):
+    """Return value if it is a YYYY-MM-DD date, otherwise None."""
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return None
+    return value
+
+
 def _resolve_date_range(range_key, start_param, end_param):
     """Turn a preset key (or custom start/end params) into concrete start/end dates."""
     today = date.today()
 
     if range_key == "custom":
-        start_date = start_param or None
-        end_date = end_param or None
-        return start_date, end_date
+        return _valid_iso_date(start_param), _valid_iso_date(end_param)
 
     if range_key == "3months":
         start_date = today - timedelta(days=90)
@@ -281,7 +306,8 @@ def refresh():
         clear_refresh_token(user["id"])
         abort(401)
 
-    response = redirect(request.referrer or url_for("landing"))
+    # Fixed local target: request.referrer is attacker-influenced (open redirect).
+    response = redirect(url_for("profile"))
     return issue_auth_cookies(response, user["id"], user["name"])
 
 
@@ -327,11 +353,17 @@ def profile():
     )
 
 
+@app.route("/analytics")
+@login_required
+def analytics():
+    return render_template("analytics.html")
+
+
 # ------------------------------------------------------------------ #
 # Placeholder routes â€” students will implement these                  #
 # ------------------------------------------------------------------ #
 
-EXPENSE_CATEGORIES = ("Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other")
+EXPENSE_CATEGORIES = CATEGORIES
 
 
 @app.route("/expenses/add", methods=["GET", "POST"])
@@ -504,5 +536,5 @@ def delete_expense_route(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1", port=5001)
 

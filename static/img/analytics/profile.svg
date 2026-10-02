@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="53" height="27" viewBox="0 0 53 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Profile" clip-path="url(#clip0_0_37)">
+<g id="search">
+<path id="Vector" d="M14.0001 19.5001L11.1068 16.6068M12.6667 12.8333C12.6667 15.7789 10.2789 18.1667 7.33333 18.1667C4.38781 18.1667 2 15.7789 2 12.8333C2 9.88781 4.38781 7.5 7.33333 7.5C10.2789 7.5 12.6667 9.88781 12.6667 12.8333Z" stroke="#8B8794" stroke-width="1.6" stroke-linecap="round"/>
+</g>
+<circle id="Avatar" cx="39.5" cy="13.5" r="13.5" fill="#FFDCCF"/>
+</g>
+<defs>
+<clipPath id="clip0_0_37">
+<rect width="53" height="27" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -36,14 +36,16 @@ expense-tracker/
 **users table**
 - `id` (INTEGER PRIMARY KEY) — auto-incrementing user ID
 - `name` (TEXT NOT NULL) — user's display name
-- `email` (TEXT UNIQUE NOT NULL) — user's email for login
+- `email` (TEXT UNIQUE NOT NULL COLLATE NOCASE) — user's email for login (case-insensitive unique)
 - `password_hash` (TEXT NOT NULL) — bcrypt-hashed password
 - `created_at` (TEXT DEFAULT now) — account creation timestamp
+- `refresh_token_hash` (TEXT) — SHA-256 hash of the active refresh token (NULL when logged out); added by the migration in `init_db()`
+- `refresh_token_expires_at` (TEXT) — ISO expiry of that refresh token; added by the migration in `init_db()`
 
 **expenses table**
 - `id` (INTEGER PRIMARY KEY) — auto-incrementing expense ID
 - `user_id` (INTEGER NOT NULL, FK→users.id) — owner of the expense
-- `amount` (REAL NOT NULL) — expense amount
+- `amount` (REAL NOT NULL CHECK (amount > 0)) — expense amount
 - `category` (TEXT NOT NULL) — category (e.g., "Food", "Transport", "Bills")
 - `date` (TEXT NOT NULL) — expense date (YYYY-MM-DD format)
 - `description` (TEXT) — optional notes
@@ -137,7 +139,8 @@ pytest -s
 - **Never put DB logic in route functions** — it belongs in `database/db.py`
 - **Never install new packages** mid-feature without explicit approval — keep `requirements.txt` in sync
 - **Never use JS frameworks** — the frontend is intentionally vanilla
-- **Always test with the seeded demo user** — email: `demo@spendly.com`, password: `demo123`
+- **Always test with the seeded demo user** — email: `demo@spendly.com`, password: `demo123`. It is only seeded when `SPENDLY_SEED_DEMO=1` or `FLASK_DEBUG=1` is set (its password is public, so it is never seeded by default); pytest seeds it itself via `conftest.py`
+- **Config via environment** — `SPENDLY_SECRET_KEY`, `SPENDLY_JWT_SECRET` (random per-process fallback if unset), `SPENDLY_DB_PATH` (alternate database file), `FLASK_DEBUG=1` (debug mode)
 - **FK enforcement is enabled** — `get_db()` runs `PRAGMA foreign_keys = ON` on every connection, so foreign key constraints are enforced
 - The app runs on **port 5001**, not the Flask default 5000 — don't change this
 - **Session-based auth** — `login_required` decorator protects routes; store `user_id` and `user_name` in Flask `session`
