@@ -84,7 +84,7 @@ Acceptance checklist:
 
 ## Generate the spec
 
-Create file: `docs/specs/<step>-<feature_slug>.md`
+Create file: `.claude/specs/<step>-<feature_slug>.md`
 
 Example: `/create_spec 2 logout` → `docs/specs/02-logout.md`
 

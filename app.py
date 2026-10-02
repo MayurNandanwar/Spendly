@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, g
+﻿from flask import Flask, render_template, request, redirect, url_for, flash, abort, g
 from functools import wraps
 from datetime import date, datetime, timedelta, timezone
 import hashlib
@@ -11,7 +11,7 @@ import jwt
 from database.db import (
     get_db, init_db, seed_db, get_expenses, get_expense_summary, get_user_by_id,
     store_refresh_token, get_user_by_refresh_token_hash, clear_refresh_token,
-    add_expense,
+    add_expense, get_expense_by_id, update_expense, delete_expense,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -214,7 +214,7 @@ def register():
                     (name, email, password_hash)
                 )
                 conn.commit()
-                flash("Account created — please sign in.", "success")
+                flash("Account created â€” please sign in.", "success")
                 return redirect(url_for("login"))
             except sqlite3.IntegrityError:
                 errors["email"] = "An account with this email already exists."
@@ -328,7 +328,7 @@ def profile():
 
 
 # ------------------------------------------------------------------ #
-# Placeholder routes — students will implement these                  #
+# Placeholder routes â€” students will implement these                  #
 # ------------------------------------------------------------------ #
 
 EXPENSE_CATEGORIES = ("Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other")
@@ -392,15 +392,117 @@ def add_expense_route():
     )
 
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+    """Display and process edit expense form."""
+    user_id = g.current_user["id"]
+    
+    # Fetch expense with ownership verification
+    expense = get_expense_by_id(user_id, id)
+    if not expense:
+        abort(404)
+    
+    errors = {}
+    amount = ""
+    category = ""
+    expense_date = ""
+    description = ""
+    
+    if request.method == "POST":
+        amount = request.form.get("amount", "").strip()
+        category = request.form.get("category", "").strip()
+        expense_date = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+        
+        parsed_amount = None
+        if not amount:
+            errors["amount"] = "Please enter an amount."
+        else:
+            try:
+                parsed_amount = float(amount)
+                if parsed_amount <= 0:
+                    errors["amount"] = "Amount must be greater than 0."
+            except ValueError:
+                errors["amount"] = "Please enter a valid number."
+        
+        if not category:
+            errors["category"] = "Please select a category."
+        elif category not in EXPENSE_CATEGORIES:
+            errors["category"] = "Please select a valid category."
+        
+        if not expense_date:
+            errors["date"] = "Please enter a date."
+        else:
+            try:
+                parsed_date = datetime.strptime(expense_date, "%Y-%m-%d").date()
+                if parsed_date > date.today():
+                    errors["date"] = "Date cannot be in the future."
+            except ValueError:
+                errors["date"] = "Please enter a valid date."
+        
+        if len(description) > 500:
+            errors["description"] = "Description must be 500 characters or fewer."
+        
+        if not errors:
+            updated_id = update_expense(user_id, id, parsed_amount, category, expense_date, description)
+            if not updated_id:
+                # Race condition: expense was deleted
+                abort(404)
+            flash("Expense updated successfully", "success")
+            return redirect(url_for("profile"))
+    
+    # Pre-populate form with current expense values on GET or validation error
+    if request.method == "GET":
+        amount = str(expense["amount"])
+        category = expense["category"]
+        expense_date = expense["date"]
+        description = expense["description"] or ""
+    
+    return render_template(
+        "edit_expense.html",
+        expense=expense,
+        errors=errors,
+        amount=amount,
+        category=category,
+        date=expense_date,
+        description=description,
+        categories=EXPENSE_CATEGORIES,
+    )
 
 
-@app.route("/expenses/<int:id>/delete")
-def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+
+@app.route("/expenses/<int:id>/delete", methods=["GET"])
+@login_required
+def delete_expense_page(id):
+    """Display confirmation page for expense deletion."""
+    user_id = g.current_user["id"]
+    expense = get_expense_by_id(user_id, id)
+
+    if not expense:
+        abort(404)
+
+    return render_template("delete_expense_confirmation.html", expense=expense)
+
+
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
+@login_required
+def delete_expense_route(id):
+    """Process expense deletion."""
+    user_id = g.current_user["id"]
+
+    # Verify expense exists and is owned by user before deletion
+    expense = get_expense_by_id(user_id, id)
+    if not expense:
+        abort(404)
+
+    # Perform deletion
+    delete_expense(user_id, id)
+
+    flash("Expense deleted successfully", "success")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+

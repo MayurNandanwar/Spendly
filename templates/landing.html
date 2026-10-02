@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 
 {% block title %}
-{%- if session.user_id -%}Your Dashboard — Spendly{%- else -%}Spendly — Track Every Rupee{%- endif -%}
+{%- if current_user -%}Your Dashboard — Spendly{%- else -%}Spendly — Track Every Rupee{%- endif -%}
 {% endblock %}
 
 {% block head %}
-{% if session.user_id %}
+{% if current_user %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endif %}
 {% endblock %}
 
 {% block content %}
 
-{% if session.user_id %}
+{% if current_user %}
 <section class="dashboard-section">
     <div class="dashboard-inner">
 
         <div class="dashboard-header">
-            <h1 class="dashboard-title">Hi, {{ session.user_name }}</h1>
+            <h1 class="dashboard-title">Hi, {{ current_user.name }}</h1>
             <p class="dashboard-subtitle">Here's a look at your spending.</p>
         </div>
 
@@ -85,7 +85,7 @@
 </section>
 {% endif %}
 
-{% if not session.user_id %}
+{% if not current_user %}
 <section class="hero">
     <div class="hero-inner">
         <div class="hero-badge">Personal Finance Tracker</div>
@@ -164,7 +164,7 @@
 </section>
 {% endif %}
 
-{% if not session.user_id %}
+{% if not current_user %}
 <section class="cta-section">
     <div class="cta-inner">
         <h2 class="cta-title">Ready to take control?</h2>

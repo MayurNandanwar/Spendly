@@ -115,6 +115,59 @@ def add_expense(user_id, amount, category, date, description):
         conn.close()
 
 
+def get_expense_by_id(user_id, expense_id):
+    """Fetch a single expense by ID with ownership verification.
+
+    Args:
+        user_id (int): user_id from session
+        expense_id (int): ID of expense to fetch
+
+    Returns:
+        sqlite3.Row: expense record {id, user_id, amount, category, date, description, created_at}
+        None: if expense not found or user doesn't own it
+    """
+    conn = get_db()
+    try:
+        expense = conn.execute(
+            "SELECT id, user_id, amount, category, date, description, created_at "
+            "FROM expenses "
+            "WHERE id = ? AND user_id = ?",
+            (expense_id, user_id)
+        ).fetchone()
+        return expense
+    finally:
+        conn.close()
+
+
+def update_expense(user_id, expense_id, amount, category, date, description):
+    """Update an existing expense with ownership verification.
+
+    Args:
+        user_id (int): user_id from session (for ownership check)
+        expense_id (int): ID of expense to update
+        amount (float): new expense amount
+        category (str): new category
+        date (str): new date (YYYY-MM-DD)
+        description (str): new description (can be empty)
+
+    Returns:
+        int: updated expense ID on success
+        None: if expense not found or user doesn't own it
+    """
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "UPDATE expenses "
+            "SET amount = ?, category = ?, date = ?, description = ? "
+            "WHERE id = ? AND user_id = ?",
+            (amount, category, date, description or None, expense_id, user_id)
+        )
+        conn.commit()
+        return expense_id if cursor.rowcount > 0 else None
+    finally:
+        conn.close()
+
+
 def get_user_by_id(user_id):
     """Return a user record by ID, or None if not found."""
     conn = get_db()
@@ -160,6 +213,20 @@ def clear_refresh_token(user_id):
             (user_id,),
         )
         conn.commit()
+    finally:
+        conn.close()
+
+
+def delete_expense(user_id, expense_id):
+    """Delete an expense if it belongs to the user. Return rows affected."""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+            (expense_id, user_id),
+        )
+        conn.commit()
+        return cursor.rowcount
     finally:
         conn.close()
 

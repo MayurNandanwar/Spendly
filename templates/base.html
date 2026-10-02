@@ -19,8 +19,8 @@
                 <span class="brand-name">Spendly</span>
             </a>
             <div class="nav-links">
-                {% if session.user_id %}
-                    <span>Hi, {{ session.user_name }}</span>
+                {% if current_user %}
+                    <span>Hi, {{ current_user.name }}</span>
                     <form method="POST" action="{{ url_for('logout') }}" style="display: inline;">
                         <button type="submit" class="nav-link-btn">Sign out</button>
                     </form>
